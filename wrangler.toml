@@ -1,0 +1,11 @@
+name = "cloudflare-user-data"
+compatibility_date = "2024-08-04"
+main = "src/index.ts"
+
+[vars]
+USER_DATA_AUTHORISATION_KEY = ""
+
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "user-data"
+database_id = "da12851e-fecc-4ed5-92eb-6f99f6440a92"
