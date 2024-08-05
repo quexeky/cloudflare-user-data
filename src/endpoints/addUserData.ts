@@ -5,27 +5,36 @@ import {z} from "zod";
 export class AddUserData extends OpenAPIRoute {
     schema = {
         request: {
-            query: z.object({
-                key: z.string().regex(/^(?:[\w-]*\.){2}[\w-]*$/),
-                user_id: z.string().uuid(),
-                data: z.object({
-                    age: z.number().nullable(),
-                    location: z.string().nullable()
-                })
-            })
+            body: {
+                content: {
+                    'application/json': {
+                        schema: z.object({
+                            key: z.string(),
+                            user_id: z.string().uuid(),
+                            username: z.string(),
+                            data: z.object({
+                                age: z.number().nullable(),
+                                location: z.string().nullable()
+                            })
+                        })
+                    }
+                }
+            }
         }
     }
     async handle(c: any) {
         const data = await this.getValidatedData<typeof this.schema>();
 
-        if (data.query.key !== c.env.USER_DATA_AUTHORISATION_KEY) {
+        if (data.body.key !== c.env.USER_DATA_AUTHORISATION_KEY) {
             return new Response(undefined, { status: 401 })
         }
-        const { age, location } = data.query.data;
+        const { age, location } = data.body.data;
+
+        console.log(data.body);
 
         const result = await c.env.DB.prepare(
-            "INSERT INTO user_sensitive_data(user_id, age, location) VALUES(?, ?, ?)",
-        ).bind(data.query.user_id, age, location).run();
+            "INSERT INTO user_sensitive_data(user_id, username, age, location) VALUES(?, ?, ?, ?)",
+        ).bind(data.body.user_id, data.body.username, age, location).run();
 
         if (!result.success) {
             return new Response(undefined, { status: 500 });
