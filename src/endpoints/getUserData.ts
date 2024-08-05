@@ -9,7 +9,7 @@ export class GetUserData extends OpenAPIRoute {
                 content: {
                     'application/json': {
                         schema: z.object({
-                            key: z.string().regex(/^(?:[\w-]*\.){2}[\w-]*$/),
+                            key: z.string(),
                             user_id: z.string().uuid(),
                             column: z.string(),
                         })
@@ -26,20 +26,20 @@ export class GetUserData extends OpenAPIRoute {
         }
 
         const result = await c.env.DB.prepare(
-            "SELECT * FROM tokens WHERE user_id = ?",
+            "SELECT * FROM user_sensitive_data WHERE user_id = ?",
         ).bind(data.body.user_id).run();
 
         if (!result.success) {
-            return new Response(undefined, { status: 500 });
+            return new Response(JSON.stringify({success: false}), { status: 500 });
         }
 
-        const requested_data = result.results[0].permissions[data.body.column];
+        const requested_data = result.results[0][data.body.column];
 
         if (requested_data !== undefined)
 
             return new Response(JSON.stringify(
                 {
-                    result
+                    requested_data
                 }),
                 { status: 200 });
         return new Response(undefined, { status: 404 })

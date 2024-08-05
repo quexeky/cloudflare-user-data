@@ -36,10 +36,7 @@ export class AddUserData extends OpenAPIRoute {
             "INSERT INTO user_sensitive_data(user_id, username, age, location) VALUES(?, ?, ?, ?)",
         ).bind(data.body.user_id, data.body.username, age, location).run();
 
-        if (!result.success) {
-            return new Response(undefined, { status: 500 });
-        }
-
+        if (!result.success) {return new Response(undefined, { status: 500 });}
 
         return new Response(JSON.stringify({
             result
