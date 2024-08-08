@@ -1,4 +1,4 @@
-import { OpenAPIRoute } from "chanfana";
+import {OpenAPIRoute} from "chanfana";
 import {z} from "zod";
 
 
@@ -22,13 +22,15 @@ export class AddUserData extends OpenAPIRoute {
             }
         }
     }
+
     async handle(c: any) {
         const data = await this.getValidatedData<typeof this.schema>();
 
         if (data.body.key !== c.env.USER_DATA_AUTHORISATION_KEY) {
-            return new Response(undefined, { status: 401 })
+            console.log("Invalid key request:", data.body.key);
+            return new Response("Invalid Key", {status: 401})
         }
-        const { age, location } = data.body.data;
+        const {age, location} = data.body.data;
 
         console.log(data.body);
 
@@ -36,11 +38,13 @@ export class AddUserData extends OpenAPIRoute {
             "INSERT INTO user_sensitive_data(user_id, username, age, location) VALUES(?, ?, ?, ?)",
         ).bind(data.body.user_id, data.body.username, age, location).run();
 
-        if (!result.success) {return new Response(undefined, { status: 500 });}
+        if (!result.success) {
+            return new Response(undefined, {status: 500});
+        }
 
         return new Response(JSON.stringify({
             result
-        }), { status: 200 });
+        }), {status: 200});
     }
 }
 

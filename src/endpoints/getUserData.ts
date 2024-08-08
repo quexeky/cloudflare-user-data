@@ -21,6 +21,7 @@ export class GetUserData extends OpenAPIRoute {
     async handle(c: any) {
         const data = await this.getValidatedData<typeof this.schema>();
 
+        console.log(c.env.USER_DATA_AUTHORISATION_KEY);
         if (data.body.key !== c.env.USER_DATA_AUTHORISATION_KEY) {
             return new Response(undefined, { status: 401 })
         }
