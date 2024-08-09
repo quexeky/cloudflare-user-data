@@ -22,7 +22,7 @@ export class GetUserData extends OpenAPIRoute {
         const data = await this.getValidatedData<typeof this.schema>();
 
         console.log(c.env.USER_DATA_AUTHORISATION_KEY);
-        if (data.body.key !== c.env.USER_DATA_AUTHORISATION_KEY) {
+        if (data.body.key !== c.env.USER_DATA_AUTH_KEY) {
             return new Response(undefined, { status: 401 })
         }
 

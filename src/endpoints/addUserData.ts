@@ -9,12 +9,11 @@ export class AddUserData extends OpenAPIRoute {
                 content: {
                     'application/json': {
                         schema: z.object({
-                            key: z.string(),
+                            key: z.string().base64().length(88),
                             user_id: z.string().uuid(),
-                            username: z.string(),
                             data: z.object({
-                                age: z.number().nullable(),
-                                location: z.string().nullable()
+                                age: z.number(),
+                                location: z.string()
                             })
                         })
                     }
@@ -26,7 +25,7 @@ export class AddUserData extends OpenAPIRoute {
     async handle(c: any) {
         const data = await this.getValidatedData<typeof this.schema>();
 
-        if (data.body.key !== c.env.USER_DATA_AUTHORISATION_KEY) {
+        if (data.body.key !== c.env.USER_DATA_AUTH_KEY) {
             console.log("Invalid key request:", data.body.key);
             return new Response("Invalid Key", {status: 401})
         }
@@ -35,8 +34,8 @@ export class AddUserData extends OpenAPIRoute {
         console.log(data.body);
 
         const result = await c.env.DB.prepare(
-            "INSERT INTO user_sensitive_data(user_id, username, age, location) VALUES(?, ?, ?, ?)",
-        ).bind(data.body.user_id, data.body.username, age, location).run();
+            "INSERT INTO user_sensitive_data(user_id, age, location) VALUES(?, ?, ?)",
+        ).bind(data.body.user_id, age, location).run();
 
         if (!result.success) {
             return new Response(undefined, {status: 500});
